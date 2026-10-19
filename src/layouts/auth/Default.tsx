@@ -1,82 +1,85 @@
 // Chakra imports
-import { Box, Flex, Icon, useColorModeValue, Text } from '@chakra-ui/react';
+import { Box, Flex, Icon, List, ListIcon, ListItem, Text, useColorModeValue } from '@chakra-ui/react';
 import Footer from 'components/footer/FooterAuth';
 import FixedPlugin from 'components/fixedPlugin/FixedPlugin';
-// Assets
-import { FaChevronLeft } from 'react-icons/fa';
-import Link from 'next/link';
+import { hospital } from 'config/hospital';
 import { ReactNode } from 'react';
+import { MdCheckCircle, MdLocalHospital } from 'react-icons/md';
 
-function AuthIllustration(props: {
-  children: ReactNode;
-  illustrationBackground: string;
-}) {
+const benefits = [
+  'View your visit history and medical records',
+  'Download records as PDF for another doctor',
+  'Fund your hospital wallet without the cash point',
+  'Track every payment and wallet transaction',
+];
+
+function AuthIllustration(props: { children: ReactNode; illustrationBackground?: string }) {
   const authBg = useColorModeValue('white', 'navy.900');
-  const { children, illustrationBackground } = props;
-  // Chakra color mode
+  const { children } = props;
   return (
-    <Flex minW="100vh" w="100%" bg={authBg} position="relative" h="max-content">
+    <Flex minH="100vh" w="100%" bg={authBg} position="relative" overflowX="hidden">
       <Flex
-        h={{
-          sm: 'initial',
-          md: 'unset',
-          lg: '100vh',
-          xl: '100vh',
-        }}
-        w={{ base: '100vw', md: '100%' }}
-        maxW={{ md: '66%', lg: '1313px' }}
+        minH="100vh"
+        w="100%"
+        maxW={{ base: '100%', md: '420px', lg: '1313px' }}
         mx={{ md: 'auto' }}
-        pt={{ sm: '50px', md: '0px' }}
         px={{ lg: '30px', xl: '0px' }}
         ps={{ xl: '70px' }}
         justifyContent="start"
         direction="column"
       >
-        <Link
-          href="/admin"
-          style={{
-            width: 'fit-content',
-            marginTop: '40px',
-          }}
-        >
+        <Flex align="center" gap="10px" mt={{ base: '24px', md: '40px' }} ps={{ base: '25px', md: '0px' }}>
           <Flex
             align="center"
-            ps={{ base: '25px', lg: '0px' }}
-            pt={{ lg: '0px', xl: '0px' }}
-            w="fit-content"
+            justify="center"
+            w="36px"
+            h="36px"
+            borderRadius="10px"
+            bg="linear-gradient(135deg, #868CFF 0%, #4318FF 100%)"
           >
-            <Icon
-              as={FaChevronLeft}
-              me="12px"
-              h="13px"
-              w="8px"
-              color="secondaryGray.600"
-            />
-            <Text ms="0px" fontSize="sm" color="secondaryGray.600">
-              Back to Simmmple
-            </Text>
+            <Icon as={MdLocalHospital} color="white" w="22px" h="22px" />
           </Flex>
-        </Link>
+          <Text fontWeight="800" color={useColorModeValue('navy.700', 'white')}>
+            {hospital.name}
+          </Text>
+        </Flex>
         {children}
         <Box
-          display={{ base: 'none', md: 'block' }}
+          display={{ base: 'none', lg: 'block' }}
           h="100%"
           minH="100vh"
-          w={{ lg: '50vw', '2xl': '44vw' }}
+          w={{ lg: '46vw', '2xl': '44vw' }}
           position="absolute"
+          top="0"
           right="0px"
         >
           <Flex
-            style={{ backgroundImage: `url(${illustrationBackground})` }}
+            bg="linear-gradient(160deg, #868CFF 0%, #4318FF 55%, #11047A 100%)"
+            direction="column"
             justify="center"
-            align="end"
             w="100%"
             h="100%"
-            bgSize="cover"
-            bgPosition="50%"
             position="absolute"
             borderBottomLeftRadius={{ lg: '120px', xl: '200px' }}
-          />
+            color="white"
+            px={{ md: '60px', xl: '90px' }}
+          >
+            <Icon as={MdLocalHospital} w="64px" h="64px" mb="20px" opacity={0.9} />
+            <Text fontSize={{ md: '3xl', xl: '4xl' }} fontWeight="800" lineHeight="1.2" mb="12px">
+              Your hospital card, now online.
+            </Text>
+            <Text fontSize="lg" opacity={0.85} mb="28px" maxW="460px">
+              Sign in with the email and password the hospital gave you at registration.
+            </Text>
+            <List spacing="12px">
+              {benefits.map((b) => (
+                <ListItem key={b} display="flex" alignItems="center">
+                  <ListIcon as={MdCheckCircle} color="whiteAlpha.900" />
+                  {b}
+                </ListItem>
+              ))}
+            </List>
+          </Flex>
         </Box>
         <Footer mb={{ xl: '3vh' }} />
       </Flex>

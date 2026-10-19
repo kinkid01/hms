@@ -1,248 +1,136 @@
 'use client';
-/* eslint-disable */
-/*!
-  _   _  ___  ____  ___ ________  _   _   _   _ ___   
- | | | |/ _ \|  _ \|_ _|__  / _ \| \ | | | | | |_ _| 
- | |_| | | | | |_) || |  / / | | |  \| | | | | || | 
- |  _  | |_| |  _ < | | / /| |_| | |\  | | |_| || |
- |_| |_|\___/|_| \_\___/____\___/|_| \_|  \___/|___|
-                                                                                                                                                                                                                                                                                                                                       
-=========================================================
-* Horizon UI - v1.1.0
-=========================================================
-
-* Product Page: https://www.horizon-ui.com/
-* Copyright 2022 Horizon UI (https://www.horizon-ui.com/)
-
-* Designed and Coded by Simmmple
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
-import React from 'react';
-// Chakra imports
 import {
-  Box,
+  Alert,
+  AlertDescription,
+  AlertIcon,
   Button,
-  Checkbox,
   Flex,
   FormControl,
+  FormErrorMessage,
   FormLabel,
-  Heading,
-  Icon,
   Input,
-  InputGroup,
-  InputRightElement,
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-// Custom components
-import { HSeparator } from 'components/separator/Separator';
+import AuthForm from 'components/portal/AuthForm';
+import { PasswordInput } from 'components/portal/PasswordFields';
+import { useAuth } from 'contexts/AuthContext';
 import DefaultAuthLayout from 'layouts/auth/Default';
-// Assets
-import Link from 'next/link';
-import { FcGoogle } from 'react-icons/fc';
-import { MdOutlineRemoveRedEye } from 'react-icons/md';
-import { RiEyeCloseLine } from 'react-icons/ri';
+import NextLink from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+
+function SignInForm() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const { session, ready, signIn } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({});
+  const [loading, setLoading] = useState(false);
+
+  const textColor = useColorModeValue('navy.700', 'white');
+  const textColorBrand = useColorModeValue('brand.500', 'white');
+
+  // Only allow internal redirects.
+  const next = params.get('next')?.startsWith('/portal') ? params.get('next') : '/portal/dashboard';
+
+  useEffect(() => {
+    if (ready && session) router.replace(session.mustChangePassword ? '/auth/change-password' : next);
+  }, [ready, session, router, next]);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const errs: typeof errors = {};
+    if (!/^\S+@\S+\.\S+$/.test(email)) errs.email = 'Enter a valid email address.';
+    if (!password) errs.password = 'Enter your password.';
+    setErrors(errs);
+    if (Object.keys(errs).length) return;
+
+    setLoading(true);
+    try {
+      await signIn(email, password); // redirect handled by the effect above
+    } catch (err) {
+      setErrors({ form: (err as Error).message });
+      setLoading(false);
+    }
+  };
+
+  return (
+    <AuthForm title="Sign In" subtitle="Access your hospital records and wallet.">
+      {params.get('expired') && (
+        <Alert status="warning" borderRadius="14px" mb="20px" fontSize="sm">
+          <AlertIcon />
+          <AlertDescription>You were signed out after a period of inactivity.</AlertDescription>
+        </Alert>
+      )}
+      {params.get('reset') && (
+        <Alert status="success" borderRadius="14px" mb="20px" fontSize="sm">
+          <AlertIcon />
+          <AlertDescription>Password reset. Sign in with your new password.</AlertDescription>
+        </Alert>
+      )}
+      {errors.form && (
+        <Alert status="error" borderRadius="14px" mb="20px" fontSize="sm">
+          <AlertIcon />
+          <AlertDescription>{errors.form}</AlertDescription>
+        </Alert>
+      )}
+
+      <form onSubmit={submit} noValidate>
+        <FormControl isInvalid={!!errors.email} mb="20px">
+          <FormLabel htmlFor="email" ms="4px" fontSize="sm" fontWeight="500" color={textColor} mb="8px">
+            Email address
+          </FormLabel>
+          <Input
+            id="email"
+            variant="auth"
+            fontSize="sm"
+            type="email"
+            placeholder="you@example.com"
+            fontWeight="500"
+            size="lg"
+            autoComplete="username"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          {errors.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
+        </FormControl>
+        <PasswordInput
+          id="password"
+          label="Password"
+          value={password}
+          onChange={setPassword}
+          error={errors.password}
+          placeholder="Your password"
+          autoComplete="current-password"
+        />
+        <Flex justify="flex-end" mb="24px" mt="-8px">
+          <NextLink href="/auth/forgot-password">
+            <Text color={textColorBrand} fontSize="sm" fontWeight="500">
+              Forgot password?
+            </Text>
+          </NextLink>
+        </Flex>
+        <Button type="submit" fontSize="sm" variant="brand" fontWeight="500" w="100%" h="50" mb="24px" isLoading={loading}>
+          Sign In
+        </Button>
+      </form>
+
+      <Text color="gray.400" fontSize="sm">
+        Don’t have portal access? Your account is created when you register at the hospital. Ask at the records
+        desk.
+      </Text>
+    </AuthForm>
+  );
+}
 
 export default function SignIn() {
-  // Chakra color mode
-  const textColor = useColorModeValue('navy.700', 'white');
-  const textColorSecondary = 'gray.400';
-  const textColorDetails = useColorModeValue('navy.700', 'secondaryGray.600');
-  const textColorBrand = useColorModeValue('brand.500', 'white');
-  const brandStars = useColorModeValue('brand.500', 'brand.400');
-  const googleBg = useColorModeValue('secondaryGray.300', 'whiteAlpha.200');
-  const googleText = useColorModeValue('navy.700', 'white');
-  const googleHover = useColorModeValue(
-    { bg: 'gray.200' },
-    { bg: 'whiteAlpha.300' },
-  );
-  const googleActive = useColorModeValue(
-    { bg: 'secondaryGray.300' },
-    { bg: 'whiteAlpha.200' },
-  );
-  const [show, setShow] = React.useState(false);
-  const handleClick = () => setShow(!show);
   return (
-    <DefaultAuthLayout illustrationBackground={'/img/auth/auth.png'}>
-      <Flex
-        maxW={{ base: '100%', md: 'max-content' }}
-        w="100%"
-        mx={{ base: 'auto', lg: '0px' }}
-        me="auto"
-        h="100%"
-        alignItems="start"
-        justifyContent="center"
-        mb={{ base: '30px', md: '60px' }}
-        px={{ base: '25px', md: '0px' }}
-        mt={{ base: '40px', md: '14vh' }}
-        flexDirection="column"
-      >
-        <Box me="auto">
-          <Heading color={textColor} fontSize="36px" mb="10px">
-            Sign In
-          </Heading>
-          <Text
-            mb="36px"
-            ms="4px"
-            color={textColorSecondary}
-            fontWeight="400"
-            fontSize="md"
-          >
-            Enter your email and password to sign in!
-          </Text>
-        </Box>
-        <Flex
-          zIndex="2"
-          direction="column"
-          w={{ base: '100%', md: '420px' }}
-          maxW="100%"
-          background="transparent"
-          borderRadius="15px"
-          mx={{ base: 'auto', lg: 'unset' }}
-          me="auto"
-          mb={{ base: '20px', md: 'auto' }}
-        >
-          <Button
-            fontSize="sm"
-            me="0px"
-            mb="26px"
-            py="15px"
-            h="50px"
-            borderRadius="16px"
-            bgColor={googleBg}
-            color={googleText}
-            fontWeight="500"
-            _hover={googleHover}
-            _active={googleActive}
-            _focus={googleActive}
-          >
-            <Icon as={FcGoogle} w="20px" h="20px" me="10px" />
-            Sign in with Google
-          </Button>
-          <Flex align="center" mb="25px">
-            <HSeparator />
-            <Text color="gray.400" mx="14px">
-              or
-            </Text>
-            <HSeparator />
-          </Flex>
-          <FormControl>
-            <FormLabel
-              display="flex"
-              ms="4px"
-              fontSize="sm"
-              fontWeight="500"
-              color={textColor}
-              mb="8px"
-            >
-              Email<Text color={brandStars}>*</Text>
-            </FormLabel>
-            <Input
-              isRequired={true}
-              variant="auth"
-              fontSize="sm"
-              ms={{ base: '0px', md: '0px' }}
-              type="email"
-              placeholder="mail@simmmple.com"
-              mb="24px"
-              fontWeight="500"
-              size="lg"
-            />
-            <FormLabel
-              ms="4px"
-              fontSize="sm"
-              fontWeight="500"
-              color={textColor}
-              display="flex"
-            >
-              Password<Text color={brandStars}>*</Text>
-            </FormLabel>
-            <InputGroup size="md">
-              <Input
-                isRequired={true}
-                fontSize="sm"
-                placeholder="Min. 8 characters"
-                mb="24px"
-                size="lg"
-                type={show ? 'text' : 'password'}
-                variant="auth"
-              />
-              <InputRightElement display="flex" alignItems="center" mt="4px">
-                <Icon
-                  color={textColorSecondary}
-                  _hover={{ cursor: 'pointer' }}
-                  as={show ? RiEyeCloseLine : MdOutlineRemoveRedEye}
-                  onClick={handleClick}
-                />
-              </InputRightElement>
-            </InputGroup>
-            <Flex justifyContent="space-between" align="center" mb="24px">
-              <FormControl display="flex" alignItems="center">
-                <Checkbox
-                  id="remember-login"
-                  colorScheme="brandScheme"
-                  me="10px"
-                />
-                <FormLabel
-                  htmlFor="remember-login"
-                  mb="0"
-                  fontWeight="normal"
-                  color={textColor}
-                  fontSize="sm"
-                >
-                  Keep me logged in
-                </FormLabel>
-              </FormControl>
-              <Link href="/auth/forgot-password">
-                <Text
-                  color={textColorBrand}
-                  fontSize="sm"
-                  w="124px"
-                  fontWeight="500"
-                >
-                  Forgot password?
-                </Text>
-              </Link>
-            </Flex>
-            <Button
-              fontSize="sm"
-              variant="brand"
-              fontWeight="500"
-              w="100%"
-              h="50"
-              mb="24px"
-            >
-              Sign In
-            </Button>
-          </FormControl>
-          <Flex
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="start"
-            maxW="100%"
-            mt="0px"
-          >
-            <Link href="/auth/sign-up">
-              <Text color={textColorDetails} fontWeight="400" fontSize="14px">
-                Not registered yet?
-                <Text
-                  color={textColorBrand}
-                  as="span"
-                  ms="5px"
-                  fontWeight="500"
-                >
-                  Create an Account
-                </Text>
-              </Text>
-            </Link>
-          </Flex>
-        </Flex>
-      </Flex>
+    <DefaultAuthLayout>
+      <Suspense>
+        <SignInForm />
+      </Suspense>
     </DefaultAuthLayout>
   );
 }

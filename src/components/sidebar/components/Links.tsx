@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { IRoute } from 'types/navigation';
 import { usePathname } from 'next/navigation';
 import { useCallback } from 'react';
+import { findCurrentRoute } from 'utils/navigation';
 
 interface SidebarLinksProps {
   routes: IRoute[];
@@ -26,18 +27,18 @@ export function SidebarLinks(props: SidebarLinksProps) {
   let textColor = useColorModeValue('secondaryGray.500', 'white');
   let brandColor = useColorModeValue('brand.500', 'brand.400');
 
-  // verifies if routeName is the one active (in browser input)
+  // verifies if routeName is the best match for the current path
+  const current = findCurrentRoute(routes, pathname);
   const activeRoute = useCallback(
-    (routeName: string) => {
-      return pathname?.includes(routeName);
-    },
-    [pathname],
+    (routeName: string) => current?.path.toLowerCase() === routeName,
+    [current],
   );
 
   // this function creates the links from the secondary accordions (for example auth -> sign-in -> default)
   const createLinks = (routes: IRoute[]) => {
     return routes.map((route, index: number) => {
       if (
+        route.layout === '/portal' ||
         route.layout === '/admin' ||
         route.layout === '/auth' ||
         route.layout === '/rtl'

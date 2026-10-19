@@ -21,15 +21,15 @@ export default function FixedPlugin (props: { [x: string]: any }) {
   return (
     <Button
       {...rest}
-      h='60px'
-      w='60px'
+      h={{ base: '48px', md: '60px' }}
+      w={{ base: '48px', md: '60px' }}
       bg={bgButton}
       zIndex='99'
       position='fixed'
       variant='no-effects'
       left={left}
-      right={right}
-      bottom='30px'
+      right={{ base: '16px', md: right }}
+      bottom={{ base: '16px', md: '30px' }}
       border='1px solid'
       borderColor='#6A53FF'
       borderRadius='50px'

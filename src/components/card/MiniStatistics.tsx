@@ -1,58 +1,43 @@
+import type { ReactElement } from 'react';
 // Chakra imports
 import { Flex, Stat, StatLabel, StatNumber, useColorModeValue, Text } from '@chakra-ui/react';
 // Custom components
 import Card from 'components/card/Card';
 
 export default function Default(props: {
-	startContent?: JSX.Element;
-	endContent?: JSX.Element;
+	startContent?: ReactElement;
+	endContent?: ReactElement;
 	name: string;
-	growth?: string | number;
+	subtitle?: string;
 	value: string | number;
 }) {
-	const { startContent, endContent, name, growth, value } = props;
+	const { startContent, endContent, name, subtitle, value } = props;
 	const textColor = useColorModeValue('secondaryGray.900', 'white');
 	const textColorSecondary = 'secondaryGray.600';
 
 	return (
-		<Card py='15px'>
-			<Flex
-				my='auto'
-				h='100%'
-				align={{ base: 'center', xl: 'center' }}
-				justify={{ base: 'center', xl: 'center' }}>
+		<Card py='15px' h='100%'>
+			<Flex my='auto' h='100%' align='center'>
 				{startContent}
 
-				<Stat my='auto' ms={startContent ? '18px' : '0px'}>
-					<StatLabel
-						lineHeight='100%'
-						color={textColorSecondary}
-						fontSize={{
-							base: 'sm'
-						}}>
+				<Stat my='auto' ms={startContent ? '16px' : '0px'} minW='0'>
+					<StatLabel lineHeight='100%' color={textColorSecondary} fontSize='sm'>
 						{name}
 					</StatLabel>
-					<StatNumber
-						color={textColor}
-						fontSize={{
-							base: '2xl'
-						}}>
+					<StatNumber color={textColor} fontSize={{ base: 'xl', '2xl': '2xl' }} noOfLines={1}>
 						{value}
 					</StatNumber>
-					{growth ? (
-						<Flex align='center'>
-							<Text color='green.500' fontSize='xs' fontWeight='700' me='5px'>
-								{growth}
-							</Text>
-							<Text color='secondaryGray.600' fontSize='xs' fontWeight='400'>
-								since last month
-							</Text>
-						</Flex>
-					) : null}
+					{subtitle && (
+						<Text color={textColorSecondary} fontSize='xs' noOfLines={1}>
+							{subtitle}
+						</Text>
+					)}
 				</Stat>
-				<Flex ms='auto' w='max-content'>
-					{endContent}
-				</Flex>
+				{endContent && (
+					<Flex ms='auto' w='max-content'>
+						{endContent}
+					</Flex>
+				)}
 			</Flex>
 		</Card>
 	);

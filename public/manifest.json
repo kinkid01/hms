@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Patient Portal",
+  "name": "City General Hospital Patient Portal",
   "icons": [
     {
       "src": "favicon.ico",
@@ -8,8 +8,8 @@
       "type": "image/x-icon"
     }
   ],
-  "start_url": ".",
+  "start_url": "/portal/dashboard",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#422AFB",
   "background_color": "#ffffff"
 }

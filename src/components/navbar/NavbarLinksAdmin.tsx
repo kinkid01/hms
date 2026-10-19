@@ -1,13 +1,11 @@
 'use client';
 // Chakra Imports
 import {
+  Avatar,
   Box,
   Button,
-  Center,
   Flex,
   Icon,
-  Image,
-  Link,
   Menu,
   MenuButton,
   MenuItem,
@@ -17,103 +15,90 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 // Custom Components
-import { ItemContent } from 'components/menu/ItemContent';
-import { SearchBar } from 'components/navbar/searchBar/SearchBar';
-import { SidebarResponsive } from 'components/sidebar/Sidebar';
+import NotificationIcon from 'components/portal/NotificationIcon';
+import { useAuth } from 'contexts/AuthContext';
+import { usePortal } from 'contexts/PortalContext';
+import { timeAgo } from 'lib/format';
+import NextLink from 'next/link';
+import { useRouter } from 'next/navigation';
 // Assets
-import navImage from '/public/img/layout/Navbar.png';
-import { FaEthereum } from 'react-icons/fa';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
-import { MdInfoOutline, MdNotificationsNone } from 'react-icons/md';
-import routes from 'routes';
+import { MdNotificationsNone } from 'react-icons/md';
+
 export default function HeaderLinks(props: {
   secondary: boolean;
   onOpen: boolean | any;
   fixed: boolean | any;
 }) {
-  const { secondary } = props;
+  const router = useRouter();
   const { colorMode, toggleColorMode } = useColorMode();
+  const { signOut } = useAuth();
+  const { patient, notifications, unreadCount, markRead, markAllRead } = usePortal();
   // Chakra Color Mode
   const navbarIcon = useColorModeValue('gray.400', 'white');
   let menuBg = useColorModeValue('white', 'navy.800');
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const textColorBrand = useColorModeValue('brand.700', 'brand.400');
-  const ethColor = useColorModeValue('gray.700', 'white');
   const borderColor = useColorModeValue('#E6ECFA', 'rgba(135, 140, 189, 0.3)');
-  const ethBg = useColorModeValue('secondaryGray.300', 'navy.900');
-  const ethBox = useColorModeValue('white', 'navy.800');
+  const hoverBg = useColorModeValue('secondaryGray.300', 'whiteAlpha.100');
   const shadow = useColorModeValue(
     '14px 17px 40px 4px rgba(112, 144, 176, 0.18)',
     '14px 17px 40px 4px rgba(112, 144, 176, 0.06)',
   );
-  const borderButton = useColorModeValue('secondaryGray.500', 'whiteAlpha.200');
+
+  const fullName = patient ? `${patient.firstName} ${patient.lastName}` : '';
 
   return (
     <Flex
-      w={{ sm: '100%', md: 'auto' }}
       alignItems="center"
       flexDirection="row"
       bg={menuBg}
-      flexWrap={secondary ? { base: 'wrap', md: 'nowrap' } : 'unset'}
-      p="10px"
+      p={{ base: '6px', md: '10px' }}
+      ps={{ base: '12px', md: '16px' }}
       borderRadius="30px"
       boxShadow={shadow}
+      gap={{ base: '2px', md: '6px' }}
     >
-      <SearchBar
-        mb={() => {
-          if (secondary) {
-            return { base: '10px', md: 'unset' };
-          }
-          return 'unset';
-        }}
-        me="10px"
-        borderRadius="30px"
-      />
-      <Flex
-        bg={ethBg}
-        display={secondary ? 'flex' : 'none'}
-        borderRadius="30px"
-        ms="auto"
-        p="6px"
-        align="center"
-        me="6px"
-      >
-        <Flex
-          align="center"
-          justify="center"
-          bg={ethBox}
-          h="29px"
-          w="29px"
-          borderRadius="30px"
-          me="7px"
-        >
-          <Icon color={ethColor} w="9px" h="14px" as={FaEthereum} />
-        </Flex>
+      {patient && (
         <Text
-          w="max-content"
-          color={ethColor}
+          display={{ base: 'none', xl: 'block' }}
           fontSize="sm"
           fontWeight="700"
-          me="6px"
+          color="secondaryGray.600"
+          me="8px"
         >
-          1,924
-          <Text as="span" display={{ base: 'none', md: 'unset' }}>
-            {' '}
-            ETH
-          </Text>
+          {patient.patientId}
         </Text>
-      </Flex>
-      <SidebarResponsive routes={routes} />
+      )}
       <Menu>
-        <MenuButton p="0px">
+        <MenuButton p="0px" position="relative" aria-label="Notifications">
           <Icon
             mt="6px"
             as={MdNotificationsNone}
             color={navbarIcon}
-            w="18px"
-            h="18px"
+            w="20px"
+            h="20px"
             me="10px"
           />
+          {unreadCount > 0 && (
+            <Box
+              position="absolute"
+              top="2px"
+              right="6px"
+              minW="16px"
+              h="16px"
+              px="4px"
+              borderRadius="full"
+              bg="red.500"
+              color="white"
+              fontSize="10px"
+              fontWeight="700"
+              lineHeight="16px"
+              textAlign="center"
+            >
+              {unreadCount}
+            </Box>
+          )}
         </MenuButton>
         <MenuList
           boxShadow={shadow}
@@ -122,106 +107,70 @@ export default function HeaderLinks(props: {
           bg={menuBg}
           border="none"
           mt="22px"
-          me={{ base: '30px', md: 'unset' }}
-          minW={{ base: 'unset', md: '400px', xl: '450px' }}
-          maxW={{ base: '360px', md: 'unset' }}
+          me={{ base: '0px', md: 'unset' }}
+          minW={{ base: 'unset', md: '400px', xl: '420px' }}
+          maxW={{ base: 'calc(100vw - 24px)', md: 'unset' }}
         >
-          <Flex w="100%" mb="20px">
+          <Flex w="100%" mb="16px">
             <Text fontSize="md" fontWeight="600" color={textColor}>
               Notifications
             </Text>
-            <Text
-              fontSize="sm"
-              fontWeight="500"
-              color={textColorBrand}
-              ms="auto"
-              cursor="pointer"
-            >
-              Mark all read
-            </Text>
+            {unreadCount > 0 && (
+              <Text
+                fontSize="sm"
+                fontWeight="500"
+                color={textColorBrand}
+                ms="auto"
+                cursor="pointer"
+                onClick={markAllRead}
+              >
+                Mark all read
+              </Text>
+            )}
           </Flex>
           <Flex flexDirection="column">
-            <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
-              px="0"
-              borderRadius="8px"
-              mb="10px"
-            >
-              <ItemContent info="Horizon UI Dashboard PRO" />
-            </MenuItem>
-            <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
-              px="0"
-              borderRadius="8px"
-              mb="10px"
-            >
-              <ItemContent info="Horizon Design System Free" />
-            </MenuItem>
-          </Flex>
-        </MenuList>
-      </Menu>
-
-      <Menu>
-        <MenuButton p="0px">
-          <Icon
-            mt="6px"
-            as={MdInfoOutline}
-            color={navbarIcon}
-            w="18px"
-            h="18px"
-            me="10px"
-          />
-        </MenuButton>
-        <MenuList
-          boxShadow={shadow}
-          p="20px"
-          me={{ base: '30px', md: 'unset' }}
-          borderRadius="20px"
-          bg={menuBg}
-          border="none"
-          mt="22px"
-          minW={{ base: 'unset' }}
-          maxW={{ base: '360px', md: 'unset' }}
-        >
-          <Image src={navImage.src} borderRadius="16px" mb="28px" alt="" />
-          <Flex flexDirection="column">
-            <Link w="100%" href="https://horizon-ui.com/pro">
-              <Button w="100%" h="44px" mb="10px" variant="brand">
-                Buy Horizon UI PRO
-              </Button>
-            </Link>
-            <Link
-              w="100%"
-              href="https://horizon-ui.com/documentation/docs/introduction"
-            >
-              <Button
-                w="100%"
-                h="44px"
-                mb="10px"
-                border="1px solid"
+            {notifications.slice(0, 4).map((n) => (
+              <MenuItem
+                key={n.id}
+                _hover={{ bg: hoverBg }}
+                _focus={{ bg: hoverBg }}
                 bg="transparent"
-                borderColor={borderButton}
+                px="8px"
+                py="10px"
+                borderRadius="12px"
+                onClick={() => {
+                  markRead(n.id);
+                  if (n.href) router.push(n.href);
+                }}
               >
-                See Documentation
-              </Button>
-            </Link>
-            <Link
-              w="100%"
-              href="https://github.com/horizon-ui/horizon-ui-chakra-nextjs"
-            >
-              <Button
-                w="100%"
-                h="44px"
-                variant="no-hover"
-                color={textColor}
-                bg="transparent"
-              >
-                Try Horizon Free
-              </Button>
-            </Link>
+                <NotificationIcon kind={n.kind} me="12px" />
+                <Flex direction="column" flex="1" minW="0">
+                  <Flex align="center" gap="6px">
+                    <Text fontSize="sm" fontWeight={n.read ? '500' : '700'} color={textColor}>
+                      {n.title}
+                    </Text>
+                    {!n.read && <Box w="7px" h="7px" borderRadius="full" bg="brand.500" />}
+                  </Flex>
+                  <Text fontSize="xs" color="secondaryGray.600" noOfLines={2}>
+                    {n.body}
+                  </Text>
+                </Flex>
+                <Text fontSize="xs" color="secondaryGray.600" ms="8px" whiteSpace="nowrap">
+                  {timeAgo(n.createdAt)}
+                </Text>
+              </MenuItem>
+            ))}
           </Flex>
+          <Button
+            as={NextLink}
+            href="/portal/notifications"
+            variant="lightBrand"
+            w="100%"
+            mt="12px"
+            size="sm"
+          >
+            View all notifications
+          </Button>
         </MenuList>
       </Menu>
 
@@ -234,6 +183,7 @@ export default function HeaderLinks(props: {
         h="18px"
         w="max-content"
         onClick={toggleColorMode}
+        aria-label="Toggle colour mode"
       >
         <Icon
           me="10px"
@@ -244,20 +194,15 @@ export default function HeaderLinks(props: {
         />
       </Button>
       <Menu>
-        <MenuButton p="0px" style={{ position: 'relative' }}>
-          <Box
-            _hover={{ cursor: 'pointer' }}
-            color="white"
+        <MenuButton p="0px" aria-label="Account menu">
+          <Avatar
+            name={fullName || undefined}
             bg="#11047A"
-            w="40px"
-            h="40px"
-            borderRadius={'50%'}
+            color="white"
+            size="sm"
+            w={{ base: '34px', md: '40px' }}
+            h={{ base: '34px', md: '40px' }}
           />
-          <Center top={0} left={0} position={'absolute'} w={'100%'} h={'100%'}>
-            <Text fontSize={'xs'} fontWeight="bold" color={'white'}>
-              AP
-            </Text>
-          </Center>
         </MenuButton>
         <MenuList
           boxShadow={shadow}
@@ -267,44 +212,49 @@ export default function HeaderLinks(props: {
           bg={menuBg}
           border="none"
         >
-          <Flex w="100%" mb="0px">
-            <Text
-              ps="20px"
-              pt="16px"
-              pb="10px"
-              w="100%"
-              borderBottom="1px solid"
-              borderColor={borderColor}
-              fontSize="sm"
-              fontWeight="700"
-              color={textColor}
-            >
-              👋&nbsp; Hey, Adela
+          <Flex
+            direction="column"
+            ps="20px"
+            pt="16px"
+            pb="10px"
+            borderBottom="1px solid"
+            borderColor={borderColor}
+          >
+            <Text fontSize="sm" fontWeight="700" color={textColor}>
+              👋&nbsp; Hi, {patient?.firstName}
+            </Text>
+            <Text fontSize="xs" color="secondaryGray.600">
+              {patient?.patientId}
             </Text>
           </Flex>
           <Flex flexDirection="column" p="10px">
             <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
+              as={NextLink}
+              href="/portal/profile"
+              _hover={{ bg: hoverBg }}
+              bg="transparent"
               borderRadius="8px"
               px="14px"
             >
-              <Text fontSize="sm">Profile Settings</Text>
+              <Text fontSize="sm">My Profile</Text>
             </MenuItem>
             <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
+              as={NextLink}
+              href="/portal/settings"
+              _hover={{ bg: hoverBg }}
+              bg="transparent"
               borderRadius="8px"
               px="14px"
             >
-              <Text fontSize="sm">Newsletter Settings</Text>
+              <Text fontSize="sm">Settings</Text>
             </MenuItem>
             <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
+              _hover={{ bg: hoverBg }}
+              bg="transparent"
               color="red.400"
               borderRadius="8px"
               px="14px"
+              onClick={() => signOut()}
             >
               <Text fontSize="sm">Log out</Text>
             </MenuItem>

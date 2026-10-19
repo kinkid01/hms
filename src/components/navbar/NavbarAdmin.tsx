@@ -1,4 +1,3 @@
-/* eslint-disable */
 // Chakra Imports
 import {
   Box,
@@ -6,155 +5,77 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   Flex,
-  Link,
   Text,
-  useColorModeValue
-} from '@chakra-ui/react'
-import { useState, useEffect } from 'react'
-import AdminNavbarLinks from 'components/navbar/NavbarLinksAdmin'
-import { isWindowAvailable } from 'utils/navigation'
+  useColorModeValue,
+} from '@chakra-ui/react';
+import AdminNavbarLinks from 'components/navbar/NavbarLinksAdmin';
+import { SidebarResponsive } from 'components/sidebar/Sidebar';
+import NextLink from 'next/link';
+import routes from 'routes';
 
-export default function AdminNavbar (props: {
-  secondary: boolean
-  message: string | boolean
-  brandText: string
-  logoText: string
-  fixed: boolean
-  onOpen: (...args: any[]) => any
+// Single-row navbar at every size: page title on the left, actions on the
+// right. On phones the breadcrumb is hidden to keep the bar short.
+export default function AdminNavbar(props: {
+  secondary: boolean;
+  message: string | boolean;
+  brandText: string;
+  logoText: string;
+  fixed: boolean;
+  onOpen: (...args: any[]) => any;
 }) {
-  const [scrolled, setScrolled] = useState(false)
+  const { brandText } = props;
 
-  useEffect(() => {
-    if (isWindowAvailable()) {
-      // You now have access to `window`
-      window.addEventListener('scroll', changeNavbar)
-
-      return () => {
-        window.removeEventListener('scroll', changeNavbar)
-      }
-    }
-  })
-
-  const { secondary, message, brandText } = props
-
-  // Here are all the props that may change depending on navbar's type or state.(secondary, variant, scrolled)
-  let mainText = useColorModeValue('navy.700', 'white')
-  let secondaryText = useColorModeValue('gray.700', 'white')
-  let navbarPosition = 'fixed' as const
-  let navbarFilter = 'none'
-  let navbarBackdrop = 'blur(20px)'
-  let navbarShadow = 'none'
-  let navbarBg = useColorModeValue(
-    'rgba(244, 247, 254, 0.2)',
-    'rgba(11,20,55,0.5)'
-  )
-  let navbarBorder = 'transparent'
-  let secondaryMargin = '0px'
-  let paddingX = '15px'
-  let gap = '0px'
-  const changeNavbar = () => {
-    if (isWindowAvailable() && window.scrollY > 1) {
-      setScrolled(true)
-    } else {
-      setScrolled(false)
-    }
-  }
+  const mainText = useColorModeValue('navy.700', 'white');
+  const secondaryText = useColorModeValue('gray.700', 'white');
+  const navbarBg = useColorModeValue('rgba(244, 247, 254, 0.85)', 'rgba(11,20,55,0.85)');
 
   return (
     <Box
-      position={navbarPosition}
-      boxShadow={navbarShadow}
+      position="fixed"
+      zIndex="10"
       bg={navbarBg}
-      borderColor={navbarBorder}
-      filter={navbarFilter}
-      backdropFilter={navbarBackdrop}
-      backgroundPosition='center'
-      backgroundSize='cover'
-      borderRadius='16px'
-      borderWidth='1.5px'
-      borderStyle='solid'
-      transitionDelay='0s, 0s, 0s, 0s'
-      transitionDuration=' 0.25s, 0.25s, 0.25s, 0s'
-      transition-property='box-shadow, background-color, filter, border'
-      transitionTimingFunction='linear, linear, linear, linear'
-      alignItems={{ xl: 'center' }}
-      display={secondary ? 'block' : 'flex'}
-      minH='75px'
-      justifyContent={{ xl: 'center' }}
-      lineHeight='25.6px'
-      mx='auto'
-      mt={secondaryMargin}
-      pb='8px'
-      right={{ base: '12px', md: '30px', lg: '30px', xl: '30px' }}
-      px={{
-        sm: paddingX,
-        md: '10px'
-      }}
-      ps={{
-        xl: '12px'
-      }}
-      pt='8px'
-      top={{ base: '12px', md: '16px', xl: '18px' }}
+      backdropFilter="blur(20px)"
+      borderRadius="16px"
+      top={{ base: '8px', md: '16px', xl: '18px' }}
+      right={{ base: '12px', md: '30px' }}
       w={{
-        base: 'calc(100vw - 6%)',
-        md: 'calc(100vw - 8%)',
-        lg: 'calc(100vw - 6%)',
+        base: 'calc(100vw - 24px)',
+        md: 'calc(100vw - 60px)',
         xl: 'calc(100vw - 350px)',
-        '2xl': 'calc(100vw - 365px)'
+        '2xl': 'calc(100vw - 365px)',
       }}
+      px={{ base: '10px', md: '12px' }}
+      py="8px"
     >
-      <Flex
-        w='100%'
-        flexDirection={{
-          sm: 'column',
-          md: 'row'
-        }}
-        alignItems={{ xl: 'center' }}
-        mb={gap}
-      >
-        <Box mb={{ sm: '8px', md: '0px' }}>
-          <Breadcrumb>
-            <BreadcrumbItem color={secondaryText} fontSize='sm' mb='5px'>
-              <BreadcrumbLink href='#' color={secondaryText}>
-                Pages
+      <Flex w="100%" align="center" gap={{ base: '6px', md: '12px' }}>
+        {/* Menu button — only below xl, where the fixed sidebar is hidden */}
+        <SidebarResponsive routes={routes} />
+        <Box flex="1" minW="0">
+          <Breadcrumb display={{ base: 'none', md: 'block' }} fontSize="sm" color={secondaryText}>
+            <BreadcrumbItem>
+              <BreadcrumbLink as={NextLink} href="/portal/dashboard">
+                Portal
               </BreadcrumbLink>
             </BreadcrumbItem>
-
-            <BreadcrumbItem color={secondaryText} fontSize='sm'>
-              <BreadcrumbLink href='#' color={secondaryText}>
-                {brandText}
-              </BreadcrumbLink>
+            <BreadcrumbItem isCurrentPage>
+              <BreadcrumbLink>{brandText}</BreadcrumbLink>
             </BreadcrumbItem>
           </Breadcrumb>
-          {/* Here we create navbar brand, based on route name */}
-          <Link
+          <Text
+            as="h1"
             color={mainText}
-            href='#'
-            bg='inherit'
-            borderRadius='inherit'
-            fontWeight='bold'
-            fontSize='34px'
-            _hover={{ color: { mainText } }}
-            _active={{
-              bg: 'inherit',
-              transform: 'none',
-              borderColor: 'transparent'
-            }}
-            _focus={{
-              boxShadow: 'none'
-            }}
+            fontWeight="bold"
+            fontSize={{ base: 'lg', '2sm': 'xl', md: '2xl', lg: '34px' }}
+            lineHeight="1.25"
+            noOfLines={1}
           >
             {brandText}
-          </Link>
+          </Text>
         </Box>
-        <Box ms='auto' w={{ sm: '100%', md: 'unset' }}>
-          <AdminNavbarLinks
-            onOpen={props.onOpen}
-            secondary={props.secondary}
-            fixed={props.fixed}
-          />
+        <Box flexShrink={0}>
+          <AdminNavbarLinks onOpen={props.onOpen} secondary={props.secondary} fixed={props.fixed} />
         </Box>
-      </Flex> 
+      </Flex>
     </Box>
-  )
+  );
 }

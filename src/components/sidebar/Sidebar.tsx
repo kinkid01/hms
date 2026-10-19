@@ -20,6 +20,7 @@ import {
   renderView,
 } from 'components/scrollbar/Scrollbar';
 import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
 
 const Scrollbars = dynamic(
   () => import('react-custom-scrollbars-2').then((mod) => mod.Scrollbars),
@@ -53,7 +54,7 @@ function Sidebar(props: SidebarProps) {
 
   // SIDEBAR
   return (
-    <Box display={{ sm: 'none', xl: 'block' }} position="fixed" minH="100%">
+    <Box display={{ base: 'none', xl: 'block' }} position="fixed" minH="100%">
       <Box
         bg={sidebarBg}
         transition={variantChange}
@@ -76,27 +77,37 @@ function Sidebar(props: SidebarProps) {
 
 export function SidebarResponsive(props: SidebarResponsiveProps) {
   let sidebarBackgroundColor = useColorModeValue('white', 'navy.800');
-  let menuColor = useColorModeValue('gray.400', 'white');
+  let menuColor = useColorModeValue('navy.700', 'white');
+  const hoverBg = useColorModeValue('whiteAlpha.700', 'whiteAlpha.100');
   // // SIDEBAR
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const btnRef = React.useRef();
+  const btnRef = React.useRef<HTMLDivElement>(null);
 
   const { routes } = props;
-  // let isWindows = navigator.platform.startsWith("Win");
-  //  BRAND
+
+  // Close the drawer after navigating (client-side route changes don't
+  // unmount it).
+  const pathname = usePathname();
+  React.useEffect(() => {
+    onClose();
+  }, [pathname, onClose]);
 
   return (
-    <Flex display={{ sm: 'flex', xl: 'none' }} alignItems="center">
-      <Flex ref={btnRef} w="max-content" h="max-content" onClick={onOpen}>
-        <Icon
-          as={IoMenuOutline}
-          color={menuColor}
-          my="auto"
-          w="20px"
-          h="20px"
-          me="10px"
-          _hover={{ cursor: 'pointer' }}
-        />
+    <Flex display={{ base: 'flex', xl: 'none' }} alignItems="center">
+      <Flex
+        ref={btnRef}
+        as="button"
+        type="button"
+        aria-label="Open menu"
+        align="center"
+        justify="center"
+        w="40px"
+        h="40px"
+        borderRadius="12px"
+        onClick={onOpen}
+        _hover={{ bg: hoverBg }}
+      >
+        <Icon as={IoMenuOutline} color={menuColor} w="24px" h="24px" />
       </Flex>
       <Drawer
         isOpen={isOpen}
